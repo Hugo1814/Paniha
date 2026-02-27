@@ -3,203 +3,235 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Planilha de Estudo da Júlia</title>
+<title>Planilha de Estudos da Júlia</title>
 
 <style>
 body{
-  margin:0;
-  font-family:'Segoe UI', sans-serif;
-  background: linear-gradient(135deg,#ffd6ec,#d6ecff);
-  display:flex;
-  justify-content:center;
+    margin:0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(180deg,#ffe6f2,#e6f7ff);
+    display:flex;
+    flex-direction:column;
+    height:100vh;
 }
 
-.container{
-  width:90%;
-  max-width:900px;
-  background:white;
-  margin:30px 0;
-  padding:25px;
-  border-radius:15px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.1);
+header{
+    background: linear-gradient(90deg,#ff66b2,#66ccff);
+    color:white;
+    padding:15px;
+    text-align:center;
+    font-size:22px;
+    font-weight:bold;
+    position:relative;
 }
 
-h1{
-  text-align:center;
-  color:#ff4fa3;
+header span{
+    display:block;
+    font-size:14px;
+    font-weight:normal;
+    margin-top:5px;
+    animation: brilho 2s infinite alternate;
 }
 
-.filtros{
-  display:flex;
-  gap:10px;
-  justify-content:center;
-  margin-bottom:20px;
-  flex-wrap:wrap;
+@keyframes brilho{
+    from{opacity:0.6;}
+    to{opacity:1;}
 }
 
-select,button{
-  padding:10px;
-  border-radius:8px;
-  border:1px solid #ccc;
-  cursor:pointer;
+.main{
+    flex:1;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    position:relative;
+}
+
+.card{
+    background:white;
+    width:90%;
+    max-width:600px;
+    padding:25px;
+    border-radius:15px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.15);
+    text-align:center;
+}
+
+.option{
+    display:block;
+    background:#f2f2f2;
+    padding:12px;
+    border-radius:8px;
+    margin:10px 0;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.option:hover{
+    background:#d9f2ff;
+}
+
+.correct{
+    background:#c8f7c5 !important;
+}
+
+.wrong{
+    background:#ffc4c4 !important;
 }
 
 button{
-  background:#4fa3ff;
-  color:white;
-  border:none;
+    background:#ff66b2;
+    color:white;
+    border:none;
+    padding:10px;
+    border-radius:8px;
+    width:100%;
+    font-weight:bold;
+    cursor:pointer;
+    margin-top:10px;
 }
 
-.questao{
-  margin-bottom:20px;
-  padding:15px;
-  background:#f9f9f9;
-  border-radius:10px;
+button:hover{
+    background:#ff3385;
 }
 
-.opcao{
-  display:block;
-  margin:5px 0;
+#score{
+    font-weight:bold;
+    margin-bottom:10px;
 }
 
-.resultado{
-  font-weight:bold;
-  text-align:center;
-  margin-top:15px;
-  font-size:18px;
+/* Aba de anotações */
+#notesTab{
+    position:fixed;
+    right:0;
+    top:0;
+    height:100%;
+    width:0;
+    background:white;
+    box-shadow:-5px 0 15px rgba(0,0,0,0.2);
+    overflow:hidden;
+    transition:0.4s;
+    padding:20px;
 }
-.correta{color:green}
-.errada{color:red}
+
+#notesTab textarea{
+    width:100%;
+    height:80%;
+    border-radius:8px;
+    padding:10px;
+    resize:none;
+    font-size:14px;
+}
+
+#openNotes{
+    position:fixed;
+    right:10px;
+    bottom:20px;
+    background:#66ccff;
+    border:none;
+    color:white;
+    padding:15px;
+    border-radius:50%;
+    font-size:18px;
+    cursor:pointer;
+    box-shadow:0 5px 15px rgba(0,0,0,0.3);
+}
 </style>
 </head>
 
 <body>
 
-<div class="container">
+<header>
+Planilha de Estudos da Júlia
+<span>Hugo te ama 💕</span>
+</header>
 
-<h1>📘 Planilha de Estudo da Júlia</h1>
-
-<div class="filtros">
-<select id="ano">
-<option value="todos">Ano</option>
-<option value="2010">2010</option>
-<option value="2015">2015</option>
-<option value="2020">2020</option>
-<option value="2023">2023</option>
-</select>
-
-<select id="materia">
-<option value="todos">Matéria</option>
-<option value="Matemática">Matemática</option>
-<option value="Português">Português</option>
-<option value="Biologia">Biologia</option>
-<option value="História">História</option>
-</select>
-
-<button onclick="gerarSimulado()">Gerar Simulado</button>
+<div class="main">
+<div class="card">
+<div id="score">Pontuação: 0</div>
+<div id="quiz"></div>
+</div>
 </div>
 
-<div id="prova"></div>
-
-<button onclick="corrigir()">Finalizar</button>
-
-<div class="resultado" id="resultado"></div>
-
+<div id="notesTab">
+<h3>Anotações</h3>
+<textarea id="notesArea" placeholder="Escreva suas anotações aqui..."></textarea>
+<button onclick="fecharNotas()">Fechar</button>
 </div>
+
+<button id="openNotes" onclick="abrirNotas()">📝</button>
 
 <script>
-
-// 🔥 Estrutura pronta para +1000 questões
-const banco = [
-
-{ano:"2010", materia:"Matemática",
-pergunta:"Quanto é 10% de 200?",
-opcoes:["10","20","30","40","50"],
-resposta:1,
-explicacao:"10% de 200 = 20."
-},
-
-{ano:"2015", materia:"Português",
-pergunta:"Hipérbole significa:",
-opcoes:["Exagero","Comparação","Oposição","Ironia","Metáfora"],
-resposta:0,
-explicacao:"Hipérbole é exagero."
-},
-
-{ano:"2020", materia:"Biologia",
-pergunta:"A fotossíntese ocorre no:",
-opcoes:["Núcleo","Mitocôndria","Cloroplasto","Ribossomo","Lisossomo"],
+let perguntas = [
+{
+materia:"Matemática",
+pergunta:"Uma escola recebeu 240 livros para distribuir igualmente entre 8 turmas. Quantos livros cada turma recebeu?",
+opcoes:["20","25","30","35"],
 resposta:2,
-explicacao:"O cloroplasto realiza a fotossíntese."
-},
-
-{ano:"2023", materia:"História",
-pergunta:"A Constituição de 1988 é chamada de:",
-opcoes:["Militar","Cidadã","Imperial","Nova República","Carta Magna"],
-resposta:1,
-explicacao:"É conhecida como Constituição Cidadã."
+explicacao:"240 ÷ 8 = 30 livros por turma."
 }
-
 ];
 
-let simulado=[];
+let atual=0;
+let pontos=0;
+let selecionado=null;
 
-function gerarSimulado(){
-  const anoFiltro=document.getElementById("ano").value;
-  const materiaFiltro=document.getElementById("materia").value;
-
-  let filtradas=banco.filter(q=>
-    (anoFiltro==="todos"||q.ano===anoFiltro) &&
-    (materiaFiltro==="todos"||q.materia===materiaFiltro)
-  );
-
-  simulado=filtradas.sort(()=>0.5-Math.random()).slice(0,5);
-
-  const provaDiv=document.getElementById("prova");
-  provaDiv.innerHTML="";
-  document.getElementById("resultado").innerHTML="";
-
-  simulado.forEach((q,i)=>{
-    const div=document.createElement("div");
-    div.className="questao";
-    div.innerHTML=`<p>${i+1}) ${q.pergunta}</p>`;
-
-    q.opcoes.forEach((op,index)=>{
-      div.innerHTML+=`
-      <label class="opcao">
-      <input type="radio" name="q${i}" value="${index}">
-      ${op}
-      </label>`;
-    });
-
-    div.innerHTML+=`<div id="exp${i}"></div>`;
-    provaDiv.appendChild(div);
-  });
+function carregar(){
+let q=perguntas[atual];
+document.getElementById("quiz").innerHTML=`
+<h3>${q.materia}</h3>
+<p>${q.pergunta}</p>
+${q.opcoes.map((op,i)=>`<div class="option" onclick="selecionar(${i})">${op}</div>`).join("")}
+<button onclick="verificar()">Verificar</button>
+<p id="feedback"></p>
+`;
 }
 
-function corrigir(){
-  let acertos=0;
-
-  simulado.forEach((q,i)=>{
-    const marcada=document.querySelector(`input[name="q${i}"]:checked`);
-    const exp=document.getElementById(`exp${i}`);
-
-    if(marcada){
-      if(parseInt(marcada.value)===q.resposta){
-        acertos++;
-        exp.innerHTML="✔ Correto! "+q.explicacao;
-        exp.className="correta";
-      }else{
-        exp.innerHTML="✘ Errado! "+q.explicacao;
-        exp.className="errada";
-      }
-    }
-  });
-
-  document.getElementById("resultado").innerHTML=
-  `Você acertou ${acertos} de ${simulado.length}`;
+function selecionar(i){
+selecionado=i;
+let op=document.querySelectorAll(".option");
+op.forEach(o=>o.style.border="none");
+op[i].style.border="2px solid #ff66b2";
 }
 
+function verificar(){
+let q=perguntas[atual];
+let op=document.querySelectorAll(".option");
+let fb=document.getElementById("feedback");
+
+if(selecionado===null){
+fb.innerHTML="⚠️ Selecione uma opção!";
+return;
+}
+
+if(selecionado===q.resposta){
+op[selecionado].classList.add("correct");
+fb.innerHTML="✅ Correto! "+q.explicacao;
+pontos++;
+}else{
+op[selecionado].classList.add("wrong");
+op[q.resposta].classList.add("correct");
+fb.innerHTML="❌ Incorreto. "+q.explicacao;
+}
+
+document.getElementById("score").innerHTML="Pontuação: "+pontos;
+}
+
+function abrirNotas(){
+document.getElementById("notesTab").style.width="300px";
+}
+
+function fecharNotas(){
+document.getElementById("notesTab").style.width="0";
+}
+
+document.getElementById("notesArea").addEventListener("input",function(){
+localStorage.setItem("anotacoes",this.value);
+});
+
+window.onload=function(){
+carregar();
+document.getElementById("notesArea").value=localStorage.getItem("anotacoes")||"";
+}
 </script>
 
 </body>
